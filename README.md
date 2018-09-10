@@ -27,7 +27,8 @@
   		this.sources = new LinkedHashSet<>(sources);
   	}
 ~~~~
-####推断Web应用类型
+
+  ####推断Web应用类型
     根据classpath中存在的相关实现类来推断相应的web应用类型
     web应用类型有以下三种
    - Web Reactive：WebApplicationType.REACTIVE
@@ -51,7 +52,7 @@
    	}
    ~~~~
  
- ####推断引导主类
+  ####推断引导主类
     根据main线程执行堆栈判断实际的引导主类
     
   推断方法是org.springframework.boot.SpringApplication.deduceMainApplicationClass
@@ -72,6 +73,7 @@
   		return null;
   	}
  ~~~~
+
 ####加载应用上下文初始化器（ApplicationContextInitializer）  
   
     上下文初始化器配置在类路径下的META-INF/spring.factories中，如
