@@ -28,7 +28,7 @@
   	}
 ~~~~
 
-  ####推断Web应用类型
+  #### 推断Web应用类型
     根据classpath中存在的相关实现类来推断相应的web应用类型
     web应用类型有以下三种
    - Web Reactive：WebApplicationType.REACTIVE
@@ -52,7 +52,7 @@
    	}
    ~~~~
  
-  ####推断引导主类
+  #### 推断引导主类
     根据main线程执行堆栈判断实际的引导主类
     
   推断方法是org.springframework.boot.SpringApplication.deduceMainApplicationClass
@@ -74,7 +74,7 @@
   	}
  ~~~~
 
-####加载应用上下文初始化器（ApplicationContextInitializer）  
+#### 加载应用上下文初始化器（ApplicationContextInitializer）  
   
     上下文初始化器配置在类路径下的META-INF/spring.factories中，如
 ~~~~java
@@ -89,10 +89,10 @@ org.springframework.boot.autoconfigure.logging.ConditionEvaluationReportLoggingL
    - 最高优先级：Ordered.HIGHEST_PRECEDENCE
    - 最小优先级： Ordered.LOWEST_PRECEDENCE
     
-####加载应用监听器（ApplicationListener）
+#### 加载应用监听器（ApplicationListener）
     应用监听器和上下文初始化器配置原理一致，都是在类路径下的META-INF/spring.factories文件中，它的键是org.springframework.context.ApplicationListener
     
-######SpringFactoriesLoader加载META-INF/spring.factories中配置类小结
+###### SpringFactoriesLoader加载META-INF/spring.factories中配置类小结
     SpringFactoriesLoader加载配置类会以父类类型进行加载，同时会根据Orderd的顺序进行加载
       
    
