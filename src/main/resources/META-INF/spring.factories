@@ -1,0 +1,6 @@
+org.springframework.context.ApplicationContextInitializer=\
+com.jimbolix.support.initializer.CustomContextInitializerOrderBefore,\
+com.jimbolix.support.initializer.CustomContextInitializerOrderLater
+org.springframework.context.ApplicationListener=\
+com.jimbolix.support.listener.CustomApplicationListenerBefore,\
+com.jimbolix.support.listener.CustomApplicationListenerLater

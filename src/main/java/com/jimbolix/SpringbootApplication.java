@@ -11,13 +11,12 @@ import java.util.Set;
 public class SpringbootApplication {
 
 	public static void main(String[] args) {
-//		SpringApplication.run(SpringbootApplication.class, args);
-		SpringApplication springApplication = new SpringApplication();
-		Set<String> sources = new HashSet<>();
-		sources.add(SpringbootApplication.class.getName());
-		springApplication.setSources(sources);
-		ConfigurableApplicationContext context = springApplication.run(args);
-		SpringbootApplication bean = context.getBean(SpringbootApplication.class);
-		System.out.println(bean.getClass());
+		SpringApplication.run(SpringbootApplication.class, args);
+//		SpringApplication springApplication = new SpringApplication();
+//		Set<String> sources = new HashSet<>();
+//		sources.add(SpringbootApplication.class.getName());
+//		springApplication.setSources(sources);
+//		ConfigurableApplicationContext context = springApplication.run(args);
+//		SpringbootApplication bean = context.getBean(SpringbootApplication.class);
 	}
 }

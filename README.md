@@ -94,5 +94,68 @@ org.springframework.boot.autoconfigure.logging.ConditionEvaluationReportLoggingL
     
 ###### SpringFactoriesLoader加载META-INF/spring.factories中配置类小结
     SpringFactoriesLoader加载配置类会以父类类型进行加载，同时会根据Orderd的顺序进行加载
-      
+
+### SpringApplication运行阶段
+    SpringApplication运行阶段主要有以下重要的过程
+   - 加载SpringApplication运行监听器
+   - 运行SpringApplication运行监听器
+   - 监听Spring Boot、Spring事件
+   - 创建应用上下文、Environment
+   - 失败：故障分析报告
+   - 回调，CommandLineRunner、ApplicationRunner
    
+   SpringApplicationRunListeners监听的方法
+   
+   监听方法 | 所属阶段说明 | spring boot起始版本
+   ---|---|---
+   starting() | spring应用刚刚启动 | 1.0
+   environmentPrepared(ConfigurableEnvironment) | ConfigurableEnvironment准备妥当，允许进行调整  |1.0
+   contextPrepared(ConfigurableApplicationContext) | ApplicationContext准备妥当，但资源尚未加载 | 1.0
+   contextLoaded(ConfigurableApplicationContext) | ApplicationContext已经装载，但是还未启动 |1.0
+   started(ConfigurableApplicationContext)|ApplicationContext已经启动，且Spring Bean已经初始化完成|2.0
+   running(ConfigurableApplicationContext)|Spring应用已经运行|2.0
+   failed(ConfigurableApplicationContext, Throwable )|应用启动失败|2.0
+   
+   #### EventPublishingRunListener
+    Spring boot中使用的运行监听器是org.springframework.boot.context.event.EventPublishingRunListener
+    EventPublishingRunListener监听方法与Spring Boot事件的对应关系
+    
+   监听方法 | Spring Boot事件 | Spring Boot起始版本
+    ---|---|---|
+    starting()|ApplicationStartingEvent|1.5
+   environmentPrepared(ConfigurableEnvironment) | ApplicationEnvironmentPreparedEvent | 1.0
+   contextLoaded(ConfigurableApplicationContext)|ApplicationPreparedEvent| 1.0
+   started(ConfigurableApplicationContext)|ApplicationStartedEvent|2.0
+   running(ConfigurableApplicationContext)|ApplicationReadyEvent|2.0
+   failed(ConfigurableApplicationContext, Throwable)|ApplicationFailedEvent|1.0
+   
+  ##### 创建应用上下文及创建Environment
+    
+    在SpringApplication类的run方法中会创建上下文对象及创建Environment对象。
+    创建上下文对象的过程如下：
+    
+   ###### 1.获取SpringApplicationRunner对象并启动
+~~~~java_holder_method_tree
+    SpringApplicationRunListeners listeners = getRunListeners(args);
+    listeners.starting();
+~~~~ 
+ ###### 2.准备Environment，并回调SpringApplicationRunner的environmentPrepared方法
+    应用会根据推断出的web类型创建对应的Environment,Environment有如下几种类型：
+ - 1.org.springframework.web.context.support.StandardServletEnvironment
+ - 2.org.springframework.core.env.StandardEnvironment
+###### 3.创建上下文对象
+    应用会根据推断出的web应用类型创建相应的上下文对象，有如下三种类型的上下文对象
+   - 1.Web应用：AnnotationConfigServletWebServerApplicationContext
+   - 2.Web Reactive：AnnotationConfigReactiveWebServerApplicationContext
+   - 3.非web应用： AnnotationConfigApplicationContext
+###### 4.准备上下文对象
+    准备上下文对象主要是向Context中设置Environment和设置SpringApplicationRunListener并调用其contextPrepared方法
+##### 5.刷新上下文对象
+### Web MVC
+#### WebMvcConfigurer自定义组件
+    如果即想保留Spring Boot MVC的特性，又想要添加自定义的MVC配置（如：拦截器等），可以建一个WebMvcConfigurer类型的配置类，在这个配置
+    类上添加@Configuration注解。如果想全面接管Spring MVC，则在自定义的配置类中添加@EnableWebMvc注解（不推荐）
+    
+    
+ 
+  
