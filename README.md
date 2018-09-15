@@ -153,9 +153,33 @@ org.springframework.boot.autoconfigure.logging.ConditionEvaluationReportLoggingL
 ##### 5.刷新上下文对象
 ### Web MVC
 #### WebMvcConfigurer自定义组件
-    如果即想保留Spring Boot MVC的特性，又想要添加自定义的MVC配置（如：拦截器等），可以建一个WebMvcConfigurer类型的配置类，在这个配置
-    类上添加@Configuration注解。如果想全面接管Spring MVC，则在自定义的配置类中添加@EnableWebMvc注解（不推荐）
+    如果即想保留Spring Boot MVC的特性，又想要添加自定义的MVC配置（如：拦截器等），可以建一个WebMvcConfigurer类型的配置类，在这个配
+    置类上添加@Configuration注解。如果想全面接管Spring MVC，则在自定义的配置类中添加@EnableWebMvc注解（不推荐）
     
-    
- 
+#### 静态资源文件
+##### 1.Spring Boot引入js等静态资源都是通过webjar的形式引入的
+    所有的/webjars/**请求都会去classpath:/META-INF/resources/webjars/下寻找资源。
+##### 2.Spring Boot对静态页面资源的映射
+    /** 这类的访问会去"classpath:/META-INF/resources/", "classpath:/resources/","classpath:/static/", "classpath:/public/"
+     等地方寻找。
+#### 国际化
+    Spring Boot已经在org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration
+        .WebMvcAutoConfigurationAdapter.localeResolver()配置了对国际化语言的自动转换。
+    关注类org.springframework.boot.autoconfigure.context.MessageSourceAutoConfiguration
+    配置国际化配置文件需要在application.yml文件中配置spring.messages.basename
+    自定义国际化配置：
+        通过向容器中注册自定义org.springframework.web.servlet.LocaleResolver组件
+~~~~java_holder_method_tree
+    @Bean
+    public LocaleResolver localeResolver(){
+         return new CustomLocaleResolver();
+    }
+~~~~
+#### 注册Servlet三大组件
+   - 1.注册自定义的Servlet
+        通过在配置类向容器中注册org.springframework.boot.web.servlet.ServletRegistrationBean来注册自定义的Servlet
+   - 2.注册自定义的过滤器
+        通过在配置类中向容器中注册org.springframework.boot.web.servlet.FilterRegistrationBean来注册自定义的过滤器
+   - 3.注册自定义的ServletListener
+        通过在配置类中向容器中注册org.springframework.boot.web.servlet.ServletListenerRegistrationBean来注册自定义的Listener
   
