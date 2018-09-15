@@ -3,3 +3,5 @@ server:
 spring:
   application:
     name: boot
+  messages:
+    basename: i18n.login
