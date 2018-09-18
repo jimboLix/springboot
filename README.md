@@ -182,4 +182,73 @@ org.springframework.boot.autoconfigure.logging.ConditionEvaluationReportLoggingL
         通过在配置类中向容器中注册org.springframework.boot.web.servlet.FilterRegistrationBean来注册自定义的过滤器
    - 3.注册自定义的ServletListener
         通过在配置类中向容器中注册org.springframework.boot.web.servlet.ServletListenerRegistrationBean来注册自定义的Listener
-  
+        
+### 数据访问
+  #### 1.数据源配置
+    数据库的连接参数配置是在org.springframework.boot.autoconfigure.jdbc.DataSourceProperties,配置文件中的前缀是spring.datasource，具体
+    可配置项见这个类的具体属性。
+  ##### 数据源的选择
+    Spring Boot默认使用的数据源是com.zaxxer.hikari.HikariDataSource。Spring boot默认配置有三种数据源可供选择：
+   - org.apache.tomcat.jdbc.pool.DataSource
+   - com.zaxxer.hikari.HikariDataSource
+   - org.apache.commons.dbcp2.BasicDataSource
+   
+    这三种数据源均配置在org.springframework.boot.autoconfigure.jdbc.DataSourceConfiguration类中，可以通过在yaml配置文件中配置
+    spring.datasource.type属性来进行数据源的选择和切换。
+  ##### 数据库初始化
+    在Spring boot应用启动时可以自定义建表及初始化数据的sql文件。
+    默认情况下配置建表文件是在classpath下：schema.sql、schema-all.sql,也可以参照org.springframework.boot.autoconfigure.jdbc.
+    DataSourceProperties类的schema的属性在yaml配置文件中进行配置。
+  ##### 自定义使用Druid数据源
+    加入Druid数据源的依赖
+  ~~~~xml
+        <dependency>
+  			<groupId>com.alibaba</groupId>
+  			<artifactId>druid</artifactId>
+  			<version>1.1.11</version>
+  		</dependency>
+  ~~~~
+    配置application.yaml文件中spring.dataSource.type属性值为com.alibaba.druid.pool.DruidDataSource
+    
+- 配置Druid数据源的属性信息（如最大连接数据等）
+#### 2.Spring Boot整合Mybatis
+    
+##### 注解版Mybatis的使用
+    使用注解的Mapper接口需要如下配置
+   - 1.在Mapper接口上使用@Mapper注解或在配置类上配置@MapperScan指定扫描的包
+   - 2.配置一些需要特别的配置项时，使用org.mybatis.spring.boot.autoconfigure.ConfigurationCustomizer的实现类进行配置
+       
+    配置示例：
+ ~~~~java
+ @Configuration
+ @MapperScan(basePackages = {"com.jimbolix.dao"})
+ public class MybatisConfiguration {
+ 
+     /**
+      * 开启驼峰属性映射
+      * product_info -> productInfo
+      * @return
+      */
+     @Bean
+     public ConfigurationCustomizer customizer(){
+         return new ConfigurationCustomizer() {
+             @Override
+             public void customize(org.apache.ibatis.session.Configuration configuration) {
+                 configuration.setMapUnderscoreToCamelCase(true);
+             }
+         };
+     }
+ }
+ ~~~~
+ 
+ ##### 使用Xml配置Mapper
+    
+    使用xml配置Mapper需要如下步骤
+ - 1.在application.yml中配置全局配置文件及Mapper.xml的位置
+ ~~~~yaml
+ mybatis:
+   config-location: classpath:mybatis/MybatisConfiguration.xml
+   mapper-locations: classpath:mybatis/mapper/*.xml
+~~~~
+
+    
