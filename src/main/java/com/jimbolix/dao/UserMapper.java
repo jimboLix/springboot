@@ -1,5 +1,7 @@
 package com.jimbolix.dao;
 
+import com.jimbolix.entity.UserInfo;
+
 /**
  * @author ruihui.li
  * @version V1.0
@@ -9,4 +11,6 @@ package com.jimbolix.dao;
  * @date 2018/9/18
  */
 public interface UserMapper {
+
+    UserInfo findById(String id);
 }

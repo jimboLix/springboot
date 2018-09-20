@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @MapperScan(basePackages = {"com.jimbolix.dao"})
 @EnableCaching
-public class MybatisConfiguration {
+public class MybatisConfigurationCustomizer {
 
     /**
      * 开启驼峰属性映射

@@ -251,4 +251,94 @@ org.springframework.boot.autoconfigure.logging.ConditionEvaluationReportLoggingL
    mapper-locations: classpath:mybatis/mapper/*.xml
 ~~~~
 
+### 缓存的使用
+    使用缓存经过如下步骤
+   - 1.导入缓存依赖
+~~~~xml
+    <dependency>
+    	<groupId>org.springframework.boot</groupId>
+    	<artifactId>spring-boot-starter-cache</artifactId>
+    </dependency>
+~~~~
+   - 2.在配置类上使用@EnableCaching注解开启缓存
+   - 3.在需要缓存的方法上使用@Cacheable注解
+
+~~~~java
+    @Cacheable(cacheNames = {"product"},key = "#id",unless = "#result == null")
+    @Transactional(readOnly = true)
+    @Override
+    public ProductInfo findById(String id) {
+        return productInfoMapper.findById(id);
+    }
+~~~~
+#### Spring boot缓存原理
+    Spring boot 默认有10个缓存配置类，默认使用的是org.springframework.boot.autoconfigure.cache.SimpleCacheConfiguration。
+    SimpleCacheConfiguration会创建ConcurrentMapCacheManager缓存管理器，缓存管理器中使用ConcurrentMap来存放Cache对象,这个管理器
+    的缓存是org.springframework.cache.concurrent.ConcurrentMapCache，在ConcurrentMapCache的缓存中是通过ConcurrentMap进行缓存
+    的存储的。
+##### @Cacheable的运行原理
+##### @Cacheable注解的一些属性说明
+- 1.value、cacheNames指定数据缓存到哪个缓存中
+~~~~java
+     @Cacheable(cacheNames = {"product"})
+~~~~
+    缓存管理器CacheManager管理了应用的全部缓存，不同的缓存使用不同的名称来标识，这里的value和cacheNames就是用来标识具体缓存的。
+- 2.key缓存的key。可以使用SpEl表达式，也可以指定keyGenerator进行自定义生成。
+~~~~java
+    @Bean(value = "keyGeneratorCustomier")
+    public KeyGenerator keyGenerator(){
+        KeyGenerator keyGenerator = new KeyGenerator() {
+           .....
+        };
+        return keyGenerator;
+    }
     
+    @Cacheable(cacheNames = {"product"},keyGenerator = "keyGeneratorCustomier")
+~~~~
+- 3.condition 缓存的条件，只有为true时才进行缓存，在方法调用前和调用后都能进行判断
+- 4.unless 用于否决缓存，只有在方法返回后执行。此时可以通过返回结果进行判断。
+~~~~java
+@Cacheable(cacheNames = {"product"},keyGenerator = "keyGeneratorCustomier",unless = "#result == null")
+~~~~
+#### 整合Redis
+
+    在引入了Redis的依赖之后，org.springframework.boot.autoconfigure.cache.RedisCacheConfiguration生效，则会默认使用
+    RedisCacheManager。在RedisAutoConfiguration自动配置类中配置了两种Redis操作模版
+   - 1.键值均为对象的RedisTemplate<Object, Object> redisTemplate
+   - 2.键值均为字符串的StringRedisTemplate stringRedisTemplate
+    
+    连接redis需要在application.yml中配置连接信息，前缀是spring.redis
+    
+##### 自定义CacheManager
+    由于Redis默认使用的是JdkSerializationRedisSerializer，所以如果想以json格式存储对象的话，需要自定义序列化器。
+    RedisCacheConfiguration配置类部分源码如下：
+~~~~java
+  @Configuration
+  @ConditionalOnClass(RedisConnectionFactory.class)
+  @AutoConfigureAfter(RedisAutoConfiguration.class)
+  @ConditionalOnBean(RedisConnectionFactory.class)
+  @ConditionalOnMissingBean(CacheManager.class)
+  @Conditional(CacheCondition.class)
+  class RedisCacheConfiguration {
+    ....
+  }
+~~~~
+    @ConditionalOnMissingBean(CacheManager.class)表明，当容器中存在CacheManager时RedisCacheConfiguration自动配置的CacheManager
+    便失效，所以需要自定义RedisCacheManager
+
+~~~~java
+    @Bean(value = "productCacheManager")
+    public RedisCacheManager redisCacheManager(RedisConnectionFactory redisConnectionFactory) {
+        Jackson2JsonRedisSerializer<ProductInfo> serializer = new Jackson2JsonRedisSerializer<ProductInfo>(ProductInfo.class);
+        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
+                .serializeValuesWith(RedisSerializationContext.SerializationPair
+                        .fromSerializer(serializer));
+        if(null != timeToLive){
+            config.entryTtl(timeToLive);
+        }
+        RedisCacheManager redisCacheManager = RedisCacheManager.builder(redisConnectionFactory).
+                cacheDefaults(config).build();
+        return redisCacheManager;
+
+    }
+~~~~
